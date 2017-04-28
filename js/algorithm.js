@@ -1,5 +1,31 @@
 $(document).ready(function()
 {
+    var mode = "hubs_not_selected";
+    var hubs_waiting_to_be_selected = 0;
+
+
+    $( "td" ).on( "click", function( event )
+    {
+        if(hubs_waiting_to_be_selected > 0)
+        {
+            // alert("that will be a new hub");
+            // $( "#1" ).addClass( "selecting-hub" );
+            var id = $(this).attr('id');
+            $("#" + id).addClass('selecting-hub');
+
+
+            hubs_waiting_to_be_selected--;
+
+
+            //when all the hubs are already selected
+            if(!hubs_waiting_to_be_selected)
+            {
+                $('td').css( 'cursor', 'auto' );
+            }
+        }
+    });
+
+
     function node() 
     {
         this.west = 0;
@@ -8,6 +34,33 @@ $(document).ready(function()
         this.south = 0;
         this.value = 0;
     }
+
+    $("#inlineFormCustomSelect").on
+    (
+        'change', function()
+        {
+
+            hubs_waiting_to_be_selected = this.value;
+            if(mode == "hubs_not_selected")
+            {
+                $('td').css( 'cursor', 'pointer' );
+                // $("td").mouseover(function(){
+                $('td').hover
+                (
+                    function()
+                    {
+                        if(hubs_waiting_to_be_selected > 0)
+                        $(this).toggleClass('selecting-hub');
+                    }
+                );
+
+            }
+            else
+            {
+
+            }
+        }
+    );
 
     $( "#onSimulate" ).on( "click", function( event ) 
     {
@@ -32,10 +85,11 @@ $(document).ready(function()
         {
             for (j=0; j<length; j++)
             {
+                 
                 //1st quarter
                 if ((j<=(length%2==0 ? Math.floor(length/2) : Math.floor(length/2))) && (i<=(height%2==0 ? Math.floor(height/2-1) : Math.floor(height/2-1))))
                 {
-
+                    nodes[y*length+x].value = i*length + j;
                     x = j;
                     y = i;
                     af = (y)/(x);
@@ -277,6 +331,14 @@ $(document).ready(function()
         }
 
         console.log(nodes);
+
+        // display calculated values
+        for(i = 0; i < height*length; i++)
+        {
+            $( "#" + i ).html( "w:" + nodes[i].west + " n:" + nodes[i].north + " e:" + nodes[i].east + " s:" + nodes[i].south);
+        }
+        
+
         
         
 
