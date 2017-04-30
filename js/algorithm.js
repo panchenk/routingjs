@@ -2,6 +2,12 @@ $(document).ready(function()
 {
     var mode = "hubs_not_selected";
     var hubs_waiting_to_be_selected = 0;
+    var nodes2 = new Array();
+    var origin2 = new origin();
+
+    const height = 10; 
+    const length = 10; 
+    
 
 
     $( "td" ).on( "click", function( event )
@@ -12,7 +18,9 @@ $(document).ready(function()
             // $( "#1" ).addClass( "selecting-hub" );
             var id = $(this).attr('id');
             $("#" + id).addClass('selecting-hub');
-
+            origin2.shift_y = Math.floor(id/length);
+            origin2.shift_x = id - Math.floor(id/length)*length;
+             console.log(origin2);
 
             hubs_waiting_to_be_selected--;
 
@@ -35,11 +43,18 @@ $(document).ready(function()
         this.value = 0;
     }
 
+    function origin() 
+    {
+        this.shift_x = 0;
+        this.shift_y = 0;
+    }
+
     $("#inlineFormCustomSelect").on
     (
         'change', function()
         {
-
+            //deselect current cells
+            $("td").removeClass('selecting-hub');
             hubs_waiting_to_be_selected = this.value;
             if(mode == "hubs_not_selected")
             {
@@ -62,28 +77,34 @@ $(document).ready(function()
         }
     );
 
-    $( "#onSimulate" ).on( "click", function( event ) 
+    $("#onSimulate").on( "click", function( event )
     {
         event.preventDefault();
         console.log("Running the simulation!");
 
-         const height = 10; 
-         const length = 10; 
+        //delesect how many hubs
+        $("#inlineFormCustomSelect").val("0");
+
+
          var i = x = y = count = path = j = 0;
          var af = xf = yf = 0.0;
         //  var j = 0;
 
         var nodes = new Array();
+
         for (i = 0; i < height*length; i++)
         {
             nodes.push(new node());
+            nodes2.push(new node());
+
+            
         }
 
         
 
-        for (i=0; i<height; i++)
+        for (j=0; j<height; j++)
         {
-            for (j=0; j<length; j++)
+            for (i=0; i<length; i++)
             {
                  
                 //1st quarter
@@ -330,12 +351,40 @@ $(document).ready(function()
             }
         }
 
-        console.log(nodes);
+        for(j = 0; j < height; j++)
+        {
+            for(i = 0; i < length; i++)
+            {
+                var new_i = i - origin2.shift_x;
+                var new_j = j - origin2.shift_y;
+                if (new_i < 0) new_i = length + new_i;
+                if (new_j < 0) new_j = height + new_j;
+                nodes2[j*length+i] = nodes[new_j*length+new_i];
+
+                if(i == 0 && j == 0) 
+                {
+                    console.log(nodes2[i*length+j]);
+                    console.log(new_i + " " + new_j);
+                }
+
+            
+            }
+        }
+
+         console.log(nodes2);
+         nodes = nodes2;
+
+         //too long to explaing what this variable means
+         const color_divisor = -255/99;
+
 
         // display calculated values
         for(i = 0; i < height*length; i++)
         {
             $( "#" + i ).html( "w:" + nodes[i].west + " n:" + nodes[i].north + " e:" + nodes[i].east + " s:" + nodes[i].south);
+            var sum_of_loads = nodes[i].west + nodes[i].north + nodes[i].east + nodes[i].south;
+            $( "#" + i ).css('background-color', "rgb(255, " + Math.floor(color_divisor*sum_of_loads + 255) + ", 0)");
+
         }
         
 
